@@ -13,3 +13,5 @@ serialize_test() ->
     ?assertEqual("*2\r\n$3\r\nget\r\n$3\r\nkey\r\n", serializor:serialize(["get", "key"])),
     ?assertEqual("*2\r\n$4\r\necho\r\n$11\r\nhello world\r\n",
                  serializor:serialize(["echo", "hello world"])).
+
+unserialize_test( ) 0 -> ?assertEqual( "$-1\r\n" , serializor : serialize( [ ] ) ) ,
