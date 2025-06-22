@@ -20,14 +20,17 @@ serialize(Commands) ->
             [Command] = Commands,
             lists:flatten(
                 io_lib:format("*~p\r\n$~p\r\n~s\r\n", [Length, length(Command), Commands]));
-        _ ->
+        N when N > 1 ->
             [Head | Tail] = Commands,
+            io:format(Tail),
             TheCommand =
                 lists:flatten(
                     io_lib:format("*~p\r\n$~p\r\n~s\r\n", [Length, length(Head), Head])),
 
-            [Serial] =
-                lists:map(fun(Command) -> io_lib:format("$~p\r\n~s\r\n", [length(Command), Command])
+            Serial =
+                lists:map(fun(Command) ->
+                             lists:flatten(
+                                 io_lib:format("$~p\r\n~s\r\n", [length(Command), Command]))
                           end,
                           Tail),
             io:format("the command ~p~n", [Serial]),

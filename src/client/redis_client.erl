@@ -8,25 +8,19 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2]).
 
 start_link(RedisPort) ->
-    io:format("This is the port, ~p~n", [RedisPort]),
     gen_server:start_link({local, ?MODULE}, ?MODULE, RedisPort, []).
 
 query(Message) ->
-    io:format("The message ~p~n, --", [Message]),
     gen_server:cast(?MODULE, {query, Message}).
 
 request(Message) ->
-    io:format("The message ~p~n call, --", [Message]),
     gen_server:call(?MODULE, {request, Message}).
 
 init(RedisPort) ->
-    io:format("This is the port, ~p~n", [RedisPort]),
-
     {ok, Sock} =
         gen_tcp:connect("localhost",
                         RedisPort,
                         [binary, {packet, 0}, {active, false}, {reuseaddr, true}]),
-    io:format("This  is the socket~p~n", [Sock]),
     spawn(fun() -> start_recieve(Sock) end),
 
     %% after doing this i should be able to recieve data being sent
@@ -47,13 +41,9 @@ handle_call({request, Message}, _From, State) ->
     {reply, State, State}.
 
 handle_cast({query, Message}, State) ->
-    io:format("The message ~p~n, --", [Message]),
     {noreply, State}.
 
-handle_info(UnknownMsg, State) ->
-    io:format("Received unknown message: ~p~n", [UnknownMsg]),
-    io:format("Received State ---: ~p~n", [State]),
-
+handle_info({message_listener, Message}, State) ->
     {noreply, State}.
 
 %% receive process
@@ -61,6 +51,8 @@ start_recieve(Socket) ->
     case gen_tcp:recv(Socket, 0) of
         {ok, Data} ->
             io:format("Received: ~p~n", [Data]),
+            %% send the data the gen_serverkk
+            Data,
             start_recieve(Socket);
         {error, closed} ->
             io:format("Client closed connection~n"),
