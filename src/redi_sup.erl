@@ -8,7 +8,6 @@
 -behaviour(supervisor).
 
 -export([start_link/0]).
-
 -export([init/1]).
 
 -define(SERVER, ?MODULE).
@@ -26,12 +25,17 @@ start_link() ->
 %%                  type => worker(),       % optional
 %%                  modules => modules()}   % optional
 init([]) ->
-    SupFlags = #{
-        strategy => one_for_all,
-        intensity => 0,
-        period => 1
-    },
-    ChildSpecs = [],
+    SupFlags =
+        #{strategy => one_for_all,
+          intensity => 0,
+          period => 1},
+    ChildSpecs =
+        [#{id => redis_client,
+           start => {redis_client, start_link, [6379]},
+           restart => permanent,
+           shutdown => 4000,
+           type => worker,
+           modules => [redis_client]}],
     {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions
